@@ -5,7 +5,7 @@ const POSTS_KEY = 'ecoSnapPosts';
 
 type StoredComment = Omit<Comment, 'author'>;
 
-// StoredPost now has an optional category for backward compatibility
+// Keep the stored shape small; full author objects are rebuilt when posts are read.
 interface StoredPost {
     id: string;
     authorId: string;
@@ -38,6 +38,7 @@ export const getPosts = (): Post[] => {
         }).filter((c): c is Comment => c !== null);
     };
 
+    // Older posts may not have a category, so give them the original discussion default.
     const enrichedPosts = storedPosts.map(post => {
         const author = userMap.get(post.authorId);
         if (!author) return null;
@@ -123,7 +124,7 @@ export const addComment = (postId: string, content: string, author: User): Comme
         post.comments.push(newComment);
         savePostsToStorage(posts);
         
-        // Return the fully enriched comment object for immediate state update
+        // Return the complete comment so the UI can update without another read.
         return {
             ...newComment,
             author

@@ -84,6 +84,7 @@ function App() {
     const { location, error: geoError, loading: geoLoading } = useGeolocation();
     
     useEffect(() => {
+        // Pick up an existing session before deciding which screen to show.
         const currentUser = authService.getCurrentUser();
         if (currentUser) {
             setUser(currentUser);
@@ -267,6 +268,7 @@ function App() {
     const renderContent = () => {
         if (!user) return null;
         
+        // Keeping the screen switch here makes navigation state easy to follow.
         switch (view) {
             case 'home':
                 return <HomeScreen onAnalysisComplete={handleAnalysisComplete} location={location} />;
@@ -325,6 +327,7 @@ function App() {
 
     return (
         <>
+            {/* This stays outside the screen content so it can appear after any action. */}
             {newlyAwardedBadge && <BadgeNotification badge={newlyAwardedBadge} onClose={() => setNewlyAwardedBadge(null)} />}
             <Layout currentView={view} setView={setView}>
                 {renderContent()}

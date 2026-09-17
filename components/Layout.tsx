@@ -45,6 +45,7 @@ const Layout: React.FC<LayoutProps> = ({ children, currentView, setView }) => {
 
     return (
         <div className="h-full w-full flex flex-col font-sans relative overflow-hidden">
+            {/* The extra bottom padding leaves room for the floating navigation on small screens. */}
             <main className="flex-grow overflow-y-auto p-4 pb-28">
                 {children}
             </main>

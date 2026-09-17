@@ -4,7 +4,7 @@ import { getChallenges, getBadges } from './challenges';
 const USERS_KEY = 'ecoSnapUsers';
 const CURRENT_USER_KEY = 'ecoSnapCurrentUser';
 
-// Helper to get users from localStorage
+// User records are kept locally for this demo, so the app works without a backend.
 const getUsersFromStorage = (): User[] => {
     const usersJson = localStorage.getItem(USERS_KEY);
     return usersJson ? JSON.parse(usersJson) : [];
@@ -32,6 +32,7 @@ export const signup = (name: string, email: string, password_provided: string): 
         throw new Error('An account with this email already exists.');
     }
 
+    // The email is the stable local ID used by posts, likes, and profile updates.
     const newUser: User = {
         id: email.toLowerCase(),
         name,
@@ -92,7 +93,7 @@ export const getCurrentUser = (): User | null => {
     const user = users.find(u => u.id === userId);
     
     if (user) {
-        // Omit password when returning user object for security
+        // Components only need the public profile, never the stored password.
         const { password, ...userWithoutPassword } = user;
         return userWithoutPassword;
     }
@@ -102,7 +103,7 @@ export const getCurrentUser = (): User | null => {
 
 export const getUsers = (): User[] => {
     const users = getUsersFromStorage();
-    // Return users without passwords
+    // Keep passwords inside the service boundary when building the user list.
     return users.map(u => {
         const { password, ...userWithoutPassword } = u;
         return userWithoutPassword;
@@ -117,7 +118,7 @@ export const updateUser = (updatedUser: Partial<User> & { id: string }): User | 
         return null;
     }
 
-    // Preserve existing sensitive/unprovided data
+    // Merge profile changes without dropping challenge progress or account data.
     const existingUser = users[userIndex];
     users[userIndex] = {
         ...existingUser,
@@ -195,20 +196,19 @@ export const trackAction = (userId: string, actionType: Challenge['type'], count
     const challenges = getChallenges();
     let completedChallenge: Challenge | null = null;
     
-    // --- Daily Challenge Reset Logic ---
+    // Daily and weekly progress reset lazily the first time the user acts.
     const today = new Date().toISOString().split('T')[0];
     if (!user.dailyChallengeData || user.dailyChallengeData.resetDate !== today) {
         user.dailyChallengeData = { resetDate: today, progress: {}, completedToday: [] };
     }
     
-    // --- Weekly Challenge Reset Logic ---
     const thisWeek = getWeekIdentifier(new Date());
     if (!user.weeklyChallengeData || user.weeklyChallengeData.resetDate !== thisWeek) {
         user.weeklyChallengeData = { resetDate: thisWeek, progress: {}, completedThisWeek: [] };
     }
 
 
-    // --- Update Stats ---
+    // Stats are updated here so scans, posts, games, and challenges use one path.
     if (!user.stats) user.stats = { totalScans: 0, totalPosts: 0, totalGames: 0, totalChallengesCompleted: 0 };
     if (user.stats.totalChallengesCompleted === undefined) user.stats.totalChallengesCompleted = user.completedChallenges.length; // Backwards compatibility
     
@@ -218,7 +218,7 @@ export const trackAction = (userId: string, actionType: Challenge['type'], count
         case 'game': user.stats.totalGames += count; break;
     }
 
-    // --- Handle Login Separately for LastLogin Tracking ---
+    // Login is tracked separately because it should not change the activity stats.
     if (actionType === 'login') {
         if (user.lastLogin === today) {
             const { password, ...userWithoutPassword } = user;
@@ -227,7 +227,7 @@ export const trackAction = (userId: string, actionType: Challenge['type'], count
         user.lastLogin = today;
     }
     
-    // --- Challenge Progress Logic ---
+    // Apply the action to only the challenges that match it.
     const relevantChallenges = challenges.filter(c => c.type === actionType);
 
     for (const challenge of relevantChallenges) {
