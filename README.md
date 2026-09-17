@@ -26,23 +26,16 @@ Features
 
 📱 Android app built with Capacitor
 
-Tech Stack
+Tech Stack:
 
-React
-
-TypeScript
-
-Vite
-
-Google Gemini API
-
-Google Maps APIs
-
-Capacitor
-
-localStorage
-
-Android
+- React
+- TypeScript
+- Vite
+- Google Gemini API
+- Google Maps APIs
+- Capacitor
+- localStorage
+- Android
 
 EcoSnap has been packaged as an Android app using Capacitor and is currently going through the Google Play testing process.
 
