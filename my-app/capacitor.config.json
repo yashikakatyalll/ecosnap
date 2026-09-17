@@ -1,0 +1,10 @@
+{
+  "appId": "com.katyal.ecosnap",
+  "appName": "EcoSnap",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false
+    }
+  }
+}

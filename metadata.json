@@ -1,0 +1,8 @@
+{
+  "name": "EcoSnap55",
+  "description": "An application to help users correctly identify and dispose of waste using real-time location rules and AI-powered image recognition.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
